@@ -5,8 +5,5 @@
       "source": "/(.*)",
       "destination": "/api"
     }
-  ],
-  "env": {
-    "PREFIX": "public"
-  }
+  ]
 }

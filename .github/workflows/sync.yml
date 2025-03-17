@@ -1,0 +1,36 @@
+name: 'Upstream Sync'
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  sync_latest_from_upstream:
+    name: 'Sync latest commits from upstream repo'
+    runs-on: ubuntu-latest
+    if: ${{ github.event.repository.fork }}
+
+    steps:
+      - name: 'Checkout target repo'
+        uses: actions/checkout@v4
+
+      - name: 'Sync upstream changes'
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3
+        with:
+          upstream_sync_repo: wozulong/open-wegram-bot
+          upstream_sync_branch: master
+          target_sync_branch: master
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          test_mode: false
+
+      - name: 'Sync check'
+        if: failure()
+        run: |
+          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次。"
+          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork."
+          exit 1

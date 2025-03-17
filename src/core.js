@@ -87,11 +87,16 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
     const message = update.message;
     const reply = message.reply_to_message;
     try {
-        if (reply && message.from.id.toString() === ownerUid) {
+        if (reply && message.chat.id.toString() === ownerUid) {
             const rm = reply.reply_markup;
             if (rm && rm.inline_keyboard && rm.inline_keyboard.length > 0) {
+                let senderUid = rm.inline_keyboard[0][0].callback_data;
+                if (!senderUid) {
+                    senderUid = rm.inline_keyboard[0][0].url.split('tg://user?id=')[1];
+                }
+
                 await postToTelegramApi(botToken, 'copyMessage', {
-                    chat_id: rm.inline_keyboard[0][0].callback_data,
+                    chat_id: parseInt(senderUid),
                     from_chat_id: message.chat.id,
                     message_id: message.message_id
                 });
@@ -104,7 +109,7 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
             return new Response('OK');
         }
 
-        const sender = message.from;
+        const sender = message.chat;
         const senderUid = sender.id.toString();
         const senderName = sender.username ? `@${sender.username}` : [sender.first_name, sender.last_name].filter(Boolean).join(' ');
 
@@ -120,7 +125,7 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
             }
 
             return await postToTelegramApi(botToken, 'copyMessage', {
-                chat_id: ownerUid,
+                chat_id: parseInt(ownerUid),
                 from_chat_id: message.chat.id,
                 message_id: message.message_id,
                 reply_markup: {inline_keyboard: ik}
