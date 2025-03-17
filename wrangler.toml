@@ -5,3 +5,21 @@ keep_vars = true
 
 [placement]
 mode = "smart"
+
+# Specify environment variables for your main production environment
+[vars]
+PREFIX = ""
+ADMIN_PASSWORD = ""
+# SECRET_TOKEN will be configured via Cloudflare Dashboard
+
+# Define a staging environment for testing
+[env.staging]
+name = "open-wegram-bot-staging"
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
+
+[env.staging.vars]
+PREFIX = "staging"
+# SECRET_TOKEN will be configured via Cloudflare Dashboard

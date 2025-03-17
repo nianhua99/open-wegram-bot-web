@@ -16,7 +16,8 @@ export default async function handler(req, res) {
 
     const config = {
         prefix: process.env.PREFIX || 'public',
-        secretToken: process.env.SECRET_TOKEN || ''
+        secretToken: process.env.SECRET_TOKEN || '',
+        adminPassword: process.env.ADMIN_PASSWORD || ''
     };
 
     const response = await handleRequest(request, config);
