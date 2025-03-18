@@ -192,6 +192,9 @@ https://open-wegram-bot.username.workers.dev/public/install/123456789/000000000:
 https://your-worker-url/YOUR_PREFIX/uninstall/BOT_API_TOKEN
 ```
 
+### BAN/UNBAN 拉黑/解除拉黑(开发中)
+
+
 ## 🔒 安全说明
 
 > [!IMPORTANT]
