@@ -16,11 +16,25 @@ export default async function handler(req, res) {
 
     const config = {
         prefix: process.env.PREFIX || 'public',
-        secretToken: process.env.SECRET_TOKEN || '',
-        adminPassword: process.env.ADMIN_PASSWORD || ''
+        secretToken: process.env.SECRET_TOKEN || ''
     };
 
-    const response = await handleRequest(request, config);
+    const storage = {
+        async get(key) {
+            const { kv } = require('@vercel/kv');
+            return await kv.get(key);
+        },
+        async put(key, value) {
+            const { kv } = require('@vercel/kv');
+            await kv.set(key, value);
+        },
+        async remove(key) {
+            const { kv } = require('@vercel/kv');
+            await kv.delete(key);
+        }
+    };
+
+    const response = await handleRequest(request, config, storage);
 
     const body = await response.text();
     const headers = {};

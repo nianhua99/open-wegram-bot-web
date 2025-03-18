@@ -8,8 +8,8 @@ mode = "smart"
 
 # Specify environment variables for your main production environment
 [vars]
-PREFIX = ""
-ADMIN_PASSWORD = ""
+PREFIX = "789"
+SECRET_TOKEN = "aGTUMHeaN8LOrcbc"
 # SECRET_TOKEN will be configured via Cloudflare Dashboard
 
 # Define a staging environment for testing
