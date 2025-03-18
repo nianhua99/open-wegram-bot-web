@@ -146,6 +146,14 @@ Cloudflare 允许您将自己的域名绑定到 Worker 上，这样您就可以�
 
 > [!WARNING]
 > 由于 Cloudflare Workers 默认域名被和谐，此步骤需要科学。如果您已绑定自定义域名，可以直接使用您的域名进行访问，无需科学工具。
+>
+1. **NEW**: 通过Web面板注册 Bot
+
+```
+https://your-worker-url/YOUR_PREFIX/admin
+```
+
+在页面中输入你Telegram UID用户ID和Bot Token即可注册。
 
 1. 在浏览器中访问以下 URL 来注册您的 Bot（替换相应参数）：
 
