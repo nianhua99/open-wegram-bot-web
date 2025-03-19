@@ -23,3 +23,7 @@ enabled = true
 [env.staging.vars]
 PREFIX = "staging"
 # SECRET_TOKEN will be configured via Cloudflare Dashboard
+
+[[kv_namespaces]]
+binding = "OWB"
+id = "2e75b414553d424c9296ead36375d0f0"

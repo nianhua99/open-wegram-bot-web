@@ -76,7 +76,7 @@ export async function handleUninstall(botToken, secretToken) {
     }
 }
 
-export async function handleWebhook(request, ownerUid, botToken, secretToken) {
+export async function handleWebhook(request, ownerUid, botToken, secretToken, storage) {
     if (secretToken !== request.headers.get('X-Telegram-Bot-Api-Secret-Token')) {
         return new Response('Unauthorized', {status: 401});
     }
@@ -99,7 +99,7 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
 
                 // 处理ban命令
                 if (message.text === '/ban') {
-                    await this.storage.put(`banned:${senderUid}`, true);
+                    await storage.put(`banned:${senderUid}`, true);
                     await postToTelegramApi(botToken, 'sendMessage', {
                         chat_id: parseInt(ownerUid),
                         text: `已封禁用户 ${senderUid}`
@@ -109,7 +109,7 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
                 
                 // 处理unban命令
                 if (message.text === '/unban') {
-                    await this.storage.put(`banned:${senderUid}`, false);
+                    await storage.delete(`banned:${senderUid}`);
                     await postToTelegramApi(botToken, 'sendMessage', {
                         chat_id: parseInt(ownerUid),
                         text: `已解封用户 ${senderUid}`
@@ -135,8 +135,9 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
         const senderUid = sender.id.toString();
 
         // 检查发送者是否被封禁
-        const isBanned = await this.storage.get(`banned:${senderUid}`);
+        const isBanned = await storage.get(`banned:${senderUid}`);
         if (isBanned) {
+            console.log('sender ' + senderUid + ' is banned, said ' + message.text);
             return new Response('OK');
         }
         const senderName = sender.username ? `@${sender.username}` : [sender.first_name, sender.last_name].filter(Boolean).join(' ');
@@ -173,7 +174,7 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken) {
 }
 
 
-export async function handleAdminRequest(request, prefix, secretToken, adminPassword) {
+export async function handleAdminRequest(request, prefix, secretToken, storage) {
     // 处理登录请求
     const url = new URL(request.url);
     const path = url.pathname;
@@ -189,11 +190,71 @@ export async function handleAdminRequest(request, prefix, secretToken, adminPass
         const { botToken } = await request.json();
         return handleUninstall(botToken, secretToken);
     }
+    
+    // 获取被封禁用户列表
+    if (path === `/${prefix}/admin/banned-users` && request.method === 'GET') {
+        try {
+            // 获取所有以 "banned:" 开头的键
+            const {keys} = await storage.list({ prefix: 'banned:' });
+            const users = [];
+            
+            // 处理每个键，提取用户信息
+            for (const key of keys) {
+            
+                if (key.name.includes(':name')) continue; // 跳过用户名键
+                
+                const uid = key.name.replace('banned:', '');
+                const banned = await storage.get(key.name);
+                const name = await storage.get(`banned:${uid}:name`) || '未知';
+                
+                users.push({
+                    uid,
+                    name,
+                    banned: banned === 'true' || banned === true
+                });
+            }
+            
+            return jsonResponse({
+                success: true,
+                users
+            });
+        } catch (error) {
+            return jsonResponse({
+                success: false,
+                message: `获取被封禁用户列表失败: ${error.message}`
+            }, 500);
+        }
+    }
+    
+    // 处理从管理面板解封用户的请求
+    if (path === `/${prefix}/admin/unban-user` && request.method === 'POST') {
+        try {
+            const { uid } = await request.json();
+            if (!uid) {
+                return jsonResponse({
+                    success: false,
+                    message: '缺少用户ID'
+                }, 400);
+            }
+            
+            await storage.put(`banned:${uid}`, false);
+            
+            return jsonResponse({
+                success: true,
+                message: `已成功解封用户 ${uid}`
+            });
+        } catch (error) {
+            return jsonResponse({
+                success: false,
+                message: `解封用户失败: ${error.message}`
+            }, 500);
+        }
+    }
 }  
 
 export async function handleRequest(request, config, storage) {
-    this.storage = storage;
-    const {prefix, secretToken, env} = config;
+
+    const {prefix, secretToken} = config;
 
     const url = new URL(request.url);
     const path = url.pathname;
@@ -205,21 +266,21 @@ export async function handleRequest(request, config, storage) {
     let match;
 
     if (match = path.match(INSTALL_PATTERN)) {
-        return handleInstall(request, match[1], match[2], prefix, secretToken);
+        return handleInstall(request, match[1], match[2], prefix, secretToken, storage);
     }
 
     if (match = path.match(UNINSTALL_PATTERN)) {
-        return handleUninstall(match[1], secretToken);
+        return handleUninstall(match[1], secretToken, storage);
     }
 
     if (match = path.match(WEBHOOK_PATTERN)) {
-        return handleWebhook(request, match[1], match[2], secretToken);
+        return handleWebhook(request, match[1], match[2], secretToken, storage);
     }
 
     if (match = path.match(ADMIN_PATTERN)) {
         // 判断进入页面还是安装和卸载请求
-        if (request.method === 'POST') {
-            return handleAdminRequest(request, prefix, secretToken);
+        if (request.method === 'POST' || path.includes('/admin/banned-users') || path.includes('/admin/unban-user')) {
+            return handleAdminRequest(request, prefix, secretToken, storage);
         }
         return renderAdminHtml();
     }

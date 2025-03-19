@@ -15,15 +15,20 @@ export default {
             secretToken: env.SECRET_TOKEN || ''
         };
 
+        console.log(env);
+
         const storage = {
             async get(key) {
-                return await env.KV.get(key);
+                return await env.OWB.get(key);
             },
             async put(key, value) {
-                await env.KV.put(key, value);
+                await env.OWB.put(key, value);
             },
-            async remove(key) {
-                await env.KV.delete(key);
+            async delete(key) {
+                await env.OWB.delete(key);
+            },
+            async list(options) {
+                return await env.OWB.list(options);
             }
         };
 
