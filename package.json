@@ -12,5 +12,8 @@
   "devDependencies": {
     "vercel": "^41.4.1",
     "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "@vercel/kv": "^3.0.0"
   }
 }
