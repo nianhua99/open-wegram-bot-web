@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         }
     };
 
-    const response = await handleRequest(request, config, storage);
+    const response = await handleRequest(request, config, storage );
 
     const body = await response.text();
     const headers = {};
