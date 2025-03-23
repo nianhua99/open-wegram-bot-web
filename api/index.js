@@ -35,7 +35,9 @@ export default async function handler(req, res) {
         },
         async list(options){
             const keys = await redis.keys(options.prefix + '*');
-            return keys.map(key => ({name: key}));
+            console.log(keys);
+            
+            return keys;
         }
     };
 
