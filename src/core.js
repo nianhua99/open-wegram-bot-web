@@ -99,7 +99,7 @@ export async function handleWebhook(request, ownerUid, botToken, secretToken, st
 
                 // 处理ban命令
                 if (message.text === '/ban') {
-                    await storage.put(`banned:${senderUid}`, true);
+                    await storage.put(`banned:${senderUid}`, "true");
                     await postToTelegramApi(botToken, 'sendMessage', {
                         chat_id: parseInt(ownerUid),
                         text: `已封禁用户 ${senderUid}`

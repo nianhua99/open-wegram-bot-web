@@ -23,7 +23,6 @@ export default async function handler(req, res) {
     };
 
     const storage = {
-
         async get(key) {
             return await redis.get(key);
         },
