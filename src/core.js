@@ -237,7 +237,7 @@ export async function handleAdminRequest(request, prefix, secretToken, storage) 
                 }, 400);
             }
             
-            await storage.put(`banned:${uid}`, false);
+            await storage.delete(`banned:${uid}`);
             
             return jsonResponse({
                 success: true,
