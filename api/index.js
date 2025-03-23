@@ -23,14 +23,15 @@ export default async function handler(req, res) {
     };
 
     const storage = {
-
         async get(key) {
             return await redis.get(key);
         },
         async put(key, value) {
-            await redis.set(key, value);
+            // TypeError: Invalid argument type
+            const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+            await redis.set(key, stringValue);
         },
-        async remove(key) {
+        async delete(key) {
             await redis.del(key);
         },
         async list(options){
