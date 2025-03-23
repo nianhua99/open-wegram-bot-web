@@ -6,7 +6,7 @@
  */
 
 import {handleRequest} from '../src/core.js';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
 export default async function handler(req, res) {
     const request = new Request(`${req.headers['x-forwarded-proto']}://${req.headers.host}${req.url}`, {
@@ -15,29 +15,31 @@ export default async function handler(req, res) {
         body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : null
     });
 
+    const redis = await createClient().connect();
+
     const config = {
         prefix: process.env.PREFIX || 'public',
         secretToken: process.env.SECRET_TOKEN || ''
     };
 
     const storage = {
-        // Vercel KV 使用 @upstash/redis 库
+
         async get(key) {
-            return await kv.get(key);
+            return await redis.get(key);
         },
         async put(key, value) {
-            await kv.set(key, value);
+            await redis.set(key, value);
         },
         async remove(key) {
-            await kv.delete(key);
+            await redis.del(key);
         },
         async list(options){
-            const list = await kv.list(options);
-            return list.filter(item => item.name.startsWith(options.prefix));
+            const keys = await redis.keys(options.prefix + '*');
+            return keys.map(key => ({name: key}));
         }
     };
 
-    const response = await handleRequest(request, config, storage );
+    const response = await handleRequest(request, config, storage);
 
     const body = await response.text();
     const headers = {};
