@@ -6,6 +6,7 @@
  */
 
 import {handleRequest} from '../src/core.js';
+import { createClient } from 'redis';
 
 export default async function handler(req, res) {
     const request = new Request(`${req.headers['x-forwarded-proto']}://${req.headers.host}${req.url}`, {
@@ -14,23 +15,27 @@ export default async function handler(req, res) {
         body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : null
     });
 
+    const redis = await createClient().connect();
+
     const config = {
         prefix: process.env.PREFIX || 'public',
         secretToken: process.env.SECRET_TOKEN || ''
     };
 
     const storage = {
+
         async get(key) {
-            const { kv } = require('@vercel/kv');
-            return await kv.get(key);
+            return await redis.get(key);
         },
         async put(key, value) {
-            const { kv } = require('@vercel/kv');
-            await kv.set(key, value);
+            await redis.set(key, value);
         },
         async remove(key) {
-            const { kv } = require('@vercel/kv');
-            await kv.delete(key);
+            await redis.del(key);
+        },
+        async list(options){
+            const keys = await redis.keys(options.prefix + '*');
+            return keys.map(key => ({name: key}));
         }
     };
 
