@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : null
     });
 
-    const redis = await createClient().connect();
+    const redis = await createClient({ url: process.env.REDIS_URL }).connect();
 
     const config = {
         prefix: process.env.PREFIX || 'public',
@@ -35,7 +35,10 @@ export default async function handler(req, res) {
         },
         async list(options){
             const keys = await redis.keys(options.prefix + '*');
-            return keys.map(key => ({name: key}));
+            console.log("keys", keys);
+            return {
+                keys: keys
+            };
         }
     };
 
