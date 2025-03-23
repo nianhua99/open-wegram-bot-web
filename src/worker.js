@@ -28,7 +28,8 @@ export default {
                 await env.OWB.delete(key);
             },
             async list(options) {
-                return await env.OWB.list(options);
+                const list = await env.OWB.list(options);
+                return list.map(item => item.name);
             }
         };
 

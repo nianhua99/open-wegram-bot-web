@@ -201,10 +201,10 @@ export async function handleAdminRequest(request, prefix, secretToken, storage) 
             // 处理每个键，提取用户信息
             for (const key of keys) {
             
-                if (key.name.includes(':name')) continue; // 跳过用户名键
+                if (key.includes(':name')) continue; // 跳过用户名键
                 
-                const uid = key.name.replace('banned:', '');
-                const banned = await storage.get(key.name);
+                const uid = key.replace('banned:', '');
+                const banned = await storage.get(key);
                 const name = await storage.get(`banned:${uid}:name`) || '未知';
                 
                 users.push({
