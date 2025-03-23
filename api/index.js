@@ -27,9 +27,10 @@ export default async function handler(req, res) {
             return await redis.get(key);
         },
         async put(key, value) {
+            // TypeError: Invalid argument type
             await redis.set(key, value);
         },
-        async remove(key) {
+        async delete(key) {
             await redis.del(key);
         },
         async list(options){
