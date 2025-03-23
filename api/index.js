@@ -28,7 +28,8 @@ export default async function handler(req, res) {
         },
         async put(key, value) {
             // TypeError: Invalid argument type
-            await redis.set(key, value);
+            const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+            await redis.set(key, stringValue);
         },
         async delete(key) {
             await redis.del(key);
