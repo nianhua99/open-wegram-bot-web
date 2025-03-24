@@ -75,7 +75,7 @@ Vercel 提供了另一种简单的部署方式，也支持从 GitHub 仓库自�
 
 1. 点击下方的"Deploy with Vercel"按钮：
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwozulong%2Fopen-wegram-bot&env=SECRET_TOKEN,PREFIX&envDescription=配置您的机器人参数&project-name=open-wegram-bot&repository-name=open-wegram-bot)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/nianhua99/open-wegram-bot-web&env=SECRET_TOKEN,PREFIX&envDescription=配置您的机器人参数&project-name=open-wegram-bot&repository-name=open-wegram-bot)
 
 2. 按照 Vercel 的提示完成部署流程
 3. 配置环境变量：
